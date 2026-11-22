@@ -1,1 +1,4 @@
 *.md
+*.txt
+.mypy_cache
+.venv
