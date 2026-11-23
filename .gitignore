@@ -1,4 +1,19 @@
-*.md
-*.txt
-.mypy_cache
-.venv
+# Python
+.venv/
+__pycache__/
+.mypy_cache/
+
+# Secrets
+.env
+
+# macOS
+.DS_Store
+
+# Big or downloaded files
+data/tinystories/
+*.pt
+*.npz
+
+# Claude
+CLAUDE.md
+ROADMAP.md
