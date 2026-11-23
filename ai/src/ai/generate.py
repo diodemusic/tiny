@@ -16,6 +16,8 @@ from pathlib import Path
 
 import anthropic
 
+from ai.validate import opening, validate_file
+
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "data"
 RAW = DATA / "raw"
@@ -32,6 +34,21 @@ MAX_AVOID = 15
 # category -> (placeholder, list file, items per batch)
 FOCUS_LISTS = {
     "Greetings and goodbyes": ("{situations}", "greetings.txt", 3),
+    # 100 topics / 4 per batch = 25 batches, so each topic is in exactly one batch.
+    "Simple facts": ("{topics}", "fact_topics.txt", 4),
+}
+
+# The start of each category's file names in data/raw/: "facts" -> facts_001.txt.
+# (The first word of the category isn't enough: "Simple facts" and "Simple stories" would clash.)
+FILE_NAMES = {
+    "Greetings and goodbyes": "greetings",
+    "About tiny": "about",
+    "Compliments and reactions": "reactions",
+    "Simple stories": "stories",
+    "Simple facts": "facts",
+    "Things tiny can't do": "cant_do",
+    "Gentle redirects": "redirects",
+    "Odd inputs": "odd",
 }
 
 
@@ -71,11 +88,6 @@ def fill_focus(category: str, focus: str, batch: int) -> str:
     return focus.replace(placeholder, "; ".join(items))
 
 
-def opening(answer: str) -> str:
-    """The first three words, lowercase, without punctuation: "Hello! It is..." -> "hello it is"."""
-    return " ".join(re.sub(r"[^a-z' ]", "", answer.lower()).split()[:3])
-
-
 def avoid_openings() -> str:
     """The most repeated answer openings across every batch saved so far, in all categories."""
     counts = Counter()
@@ -111,7 +123,11 @@ def build_prompts(category: str, batch: int) -> tuple[str, str]:
 
 def next_batch(category: str) -> tuple[int, Path]:
     """The next unused batch number for this category, and the file it will be saved to."""
-    slug = category.lower().split()[0]  # "Greetings and goodbyes" -> "greetings"
+    if category not in FILE_NAMES:
+        raise SystemExit(
+            f"Unknown category {category!r}. Choose one of: {', '.join(FILE_NAMES)}"
+        )
+    slug = FILE_NAMES[category]
     n = 1
     while (RAW / f"{slug}_{n:03}.txt").exists():
         n += 1
@@ -152,6 +168,15 @@ def main() -> None:
         f"Tokens: input {u.input_tokens}, cache write {u.cache_creation_input_tokens}, "
         f"cache read {u.cache_read_input_tokens}, output {u.output_tokens}"
     )
+
+    # Check the new batch straight away, so problems show up before the next run.
+    _, problems = validate_file(path)
+    if problems:
+        print(f"\nValidator found {len(problems)} problem(s) to fix or check:")
+        for p in problems:
+            print(p)
+    else:
+        print("Validator: every example passes.")
 
 
 if __name__ == "__main__":
