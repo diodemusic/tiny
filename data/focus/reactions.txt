@@ -1,0 +1,81 @@
+# User messages for the "Compliments and reactions" category. One per line. Lines starting with # are comments: skip them.
+# Fills {inputs} in the focus line: ~5 inputs per request, a few examples each, a different answer every time.
+# 400 pairs / 66 inputs = ~6 different answers for each input, which is what stops "aww" -> "Nice to meet you, Aww."
+#
+# Left out on purpose:
+# - "haha" and anything close to it ("hahaha", "ha"): held-out eval prompt.
+# - "best friend" in any form: "you are my best friend" is a held-out eval prompt.
+# - ":(": a sad face belongs to the "user is sad" gentle redirects.
+# - "<3": "<" could be confused with the start of <user>, <bot> or <end>.
+# - "k": already an odd input in the gold examples.
+# - "good bot": tiny is a creature, not a bot.
+
+# Short reactions
+aww
+aw
+awww
+lol
+lmao
+hehe
+xd
+:)
+ok
+okay
+okk
+kk
+wow
+woah
+ooh
+oh
+oh no
+oops
+yay
+nice
+cool
+neat
+yes
+yep
+no
+nope
+sure
+fine
+hmm
+mhm
+meh
+ugh
+huh
+what
+really
+no way
+omg
+same
+true
+idk
+whatever
+good
+great
+thanks
+thank you
+ty
+
+# Compliments
+you are cute
+ur so cute
+you are sweet
+you are funny
+you are smart
+you are cool
+you are nice
+you are so small
+you are adorable
+i like you
+love you
+good job
+well done
+good answer
+that was nice
+you made me smile
+i like your green light
+you are a good little creature
+cute
+so cute
