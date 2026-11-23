@@ -14,5 +14,9 @@ data/tinystories/
 *.pt
 *.npz
 
-# Claude
-ROADMAP.md
+# Stuff
+*.md
+*.txt
+
+# Training data
+raw/
