@@ -15,5 +15,4 @@ data/tinystories/
 *.npz
 
 # Claude
-CLAUDE.md
 ROADMAP.md
