@@ -36,6 +36,8 @@ FOCUS_LISTS = {
     "Greetings and goodbyes": ("{situations}", "greetings.txt", 3),
     # 100 topics / 4 per batch = 25 batches, so each topic is in exactly one batch.
     "Simple facts": ("{topics}", "fact_topics.txt", 4),
+    # 66 inputs / 6 per batch = 11 batches, so 22 batches show every input exactly twice.
+    "Compliments and reactions": ("{inputs}", "reactions.txt", 6),
 }
 
 # The start of each category's file names in data/raw/: "facts" -> facts_001.txt.
