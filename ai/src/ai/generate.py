@@ -30,10 +30,13 @@ MIN_REPEATS = 2
 # ...and at most this many are listed, most common first, to keep the request short.
 MAX_AVOID = 15
 
-# Categories whose {focus} line rotates through a list in data/focus/:
-# category -> (placeholder, list file, items per batch)
+# Categories whose {focus} line rotates through a list:
+# category -> (placeholder, list file in data/focus/ or a function that returns the list, items per batch)
 FOCUS_LISTS = {
     "Greetings and goodbyes": ("{situations}", "greetings.txt", 3),
+    # 24 rows of persona.md / 2 per batch = 12 batches, so 60 batches show every topic 5 times.
+    # (A lambda, because about_topics is defined further down the file.)
+    "About tiny": ("{topics}", lambda: about_topics(), 2),
     # 100 topics / 4 per batch = 25 batches, so each topic is in exactly one batch.
     "Simple facts": ("{topics}", "fact_topics.txt", 4),
     # 66 inputs / 6 per batch = 11 batches, so 22 batches show every input exactly twice.
@@ -75,6 +78,31 @@ def read_list(path: Path) -> list[str]:
     return [l.strip() for l in lines if l.strip() and not l.startswith("#")]  # noqa: E741
 
 
+def section(markdown: str, heading: str) -> str:
+    """The text under `heading`, up to the next ## heading."""
+    after = markdown.split(heading + "\n", 1)[1]
+    return after.split("\n## ", 1)[0]
+
+
+def table_rows(text: str) -> list[list[str]]:
+    """The cells of every row of the first markdown table in `text`, without the header rows."""
+    rows = [line for line in text.splitlines() if line.startswith("|")]
+    return [[c.strip() for c in row.strip("|").split("|")] for row in rows[2:]]
+
+
+def about_topics() -> list[str]:
+    """One topic per row of persona.md: the canon facts, then the likes, then the dislikes.
+
+    Read straight from persona.md, so editing a fact there changes the prompts too.
+    """
+    persona = (DATA / "persona.md").read_text()
+    facts = [f"{topic}: {fact}" for topic, fact, _ in table_rows(section(persona, "## Canon facts"))]
+    likes_text = section(persona, "## What tiny likes")
+    likes = [f"What tiny likes. {thing}: {fav}" for thing, fav in table_rows(likes_text)]
+    dislikes = [f"What tiny dislikes: {line[2:].rstrip('.')}" for line in likes_text.splitlines() if line.startswith("- ")]
+    return facts + likes + dislikes
+
+
 def rotate(items: list[str], per_batch: int, batch: int) -> list[str]:
     """Batch 1 gets items 0-2, batch 2 gets 3-5, ... wrapping round at the end of the list."""
     start = (batch - 1) * per_batch
@@ -85,8 +113,9 @@ def fill_focus(category: str, focus: str, batch: int) -> str:
     """Put this batch's items from the category's list into its focus line."""
     if category not in FOCUS_LISTS:
         return focus
-    placeholder, filename, per_batch = FOCUS_LISTS[category]
-    items = rotate(read_list(DATA / "focus" / filename), per_batch, batch)
+    placeholder, source, per_batch = FOCUS_LISTS[category]
+    all_items = source() if callable(source) else read_list(DATA / "focus" / source)
+    items = rotate(all_items, per_batch, batch)
     return focus.replace(placeholder, "; ".join(items))
 
 
