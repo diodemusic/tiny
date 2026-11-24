@@ -17,6 +17,7 @@ data/tinystories/
 # Stuff
 *.md
 *.txt
+!README.md
 
 # Training data
 raw/
